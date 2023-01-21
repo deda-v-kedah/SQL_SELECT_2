@@ -21,45 +21,45 @@ WHERE authors_id NOT IN  (SELECT DISTINCT a2.authors_id  FROM albums a
 
 					
 					
-SELECT DISTINCT c.name  FROM songcollection s 
-JOIN collection c ON s.collection_id = c.collection_id 
-WHERE song_id IN (SELECT songs_id  FROM songs s 
-					WHERE albums_id IN (SELECT albums_id  FROM authorsalbums a 
-										WHERE authors_id IN (SELECT authors_id FROM authors a 
-															WHERE "name" LIKE 'Король и шут')))
+SELECT DISTINCT c.name FROM authors a 
+JOIN authorsalbums a2 ON a.authors_id = a2.authors_id 
+JOIN songs s ON a2.albums_id = s.albums_id 
+JOIN songcollection s2 ON s.songs_id = s2.song_id 
+JOIN collection c ON s2.collection_id = c.collection_id 
+WHERE a.name LIKE 'Король и шут';
 
-																											
-
-
-SELECT a2.name  FROM authorsalbums a 
-LEFT JOIN albums a2 ON a.albums_id = a2.albums_id 
-WHERE authors_id IN (SELECT authors_id FROM genresauthors g  
-					GROUP BY authors_id 
-					HAVING COUNT(*) > 1)
-
-															
-
-					
-SELECT name FROM songs s 
-WHERE songs_id NOT IN (SELECT song_id FROM songcollection s2)
+						  
 
 
+SELECT a2.name  FROM genresauthors g 
+JOIN authorsalbums a ON g.authors_id = a.authors_id 
+JOIN albums a2 ON a.albums_id = a2.albums_id 
+GROUP BY a2."name" 
+HAVING COUNT(*) > 1
 
-SELECT DISTINCT a2.name, count(*)  FROM songs s 
+						  
+						  
+SELECT s.name  FROM songs s 
+LEFT JOIN songcollection s2 ON s.songs_id = s2.song_id 
+WHERE s2.collection_id IS NULL
+
+
+
+
+SELECT DISTINCT a2.name  FROM songs s 
 LEFT JOIN authorsalbums a ON s.albums_id = a.albums_id 
 LEFT JOIN authors a2 ON a.authors_id = a2.authors_id 
 WHERE duration IN(SELECT MIN(duration) FROM songs s)
-GROUP BY a2."name" 
 
 
 
-
-SELECT a.name my_count FROM songs s
-JOIN albums a ON a.albums_id = s.albums_id 
-GROUP BY a.name
-HAVING s.count IN (SELECT MIN(_count) FROM (SELECT albums_id, COUNT(*) as _count FROM songs s GROUP BY albums_id ) as count_treck)
-
-
-
-															
+SELECT  a."name"  FROM songs s 
+JOIN albums a ON s.albums_id = a.albums_id 
+GROUP BY a."name" 
+HAVING COUNT(*) = (SELECT COUNT(*) FROM songs s 
+				   JOIN albums a ON s.albums_id = a.albums_id 
+				   GROUP BY a."name" 
+				   ORDER BY COUNT(*) 
+				   LIMIT(1))
+												
 
